@@ -151,6 +151,10 @@ function normalizarBusqueda(valor) {
     .toLowerCase();
 }
 
+function esAsesorValido(valor) {
+  return ASESORES.includes(texto(valor));
+}
+
 function validarTelefono(valor) {
   const telefono = soloNumeros(valor);
 
@@ -196,7 +200,7 @@ function normalizarPayload(form) {
     auto_interes: texto(form.auto_interes),
     fecha_hora_cita: texto(form.fecha_hora_cita),
     fuente_prospeccion: texto(form.fuente_prospeccion),
-    asesor_piso: texto(form.asesor_piso),
+    asesor_piso: esAsesorValido(form.asesor_piso) ? texto(form.asesor_piso) : "",
     comentarios: texto(form.comentarios),
   };
 }
@@ -210,8 +214,13 @@ function obtenerErrores(form) {
   if (!texto(form.auto_interes)) errores.auto_interes = "Selecciona el VW de interés.";
   if (!texto(form.fecha_hora_cita)) errores.fecha_hora_cita = "Selecciona fecha y hora.";
   if (!texto(form.fuente_prospeccion)) errores.fuente_prospeccion = "Selecciona la fuente.";
-  if (!texto(form.asesor_piso)) errores.asesor_piso = "Selecciona el asesor de piso.";
+  const asesorPiso = texto(form.asesor_piso);
 
+  if (!asesorPiso) {
+    errores.asesor_piso = "Selecciona el asesor de piso.";
+  } else if (!esAsesorValido(asesorPiso)) {
+    errores.asesor_piso = "Debes seleccionar un asesor válido del catálogo.";
+  }
   return errores;
 }
 
@@ -304,6 +313,9 @@ function AsesorAutocomplete({ value, onChange, error }) {
     }).slice(0, 8);
   }, [value]);
 
+  const valorEsValido = esAsesorValido(value);
+  const tieneTextoInvalido = texto(value) && !valorEsValido;
+
   return (
     <div className="relative w-full lg:w-40">
       <div className="relative">
@@ -311,7 +323,7 @@ function AsesorAutocomplete({ value, onChange, error }) {
 
         <Input
           value={value}
-          error={error}
+          error={error || tieneTextoInvalido}
           onFocus={() => setAbierto(true)}
           onBlur={() => {
             window.setTimeout(() => setAbierto(false), 120);
@@ -328,14 +340,9 @@ function AsesorAutocomplete({ value, onChange, error }) {
       {abierto ? (
         <div className="absolute left-0 right-0 z-30 mt-1 max-h-48 overflow-y-auto rounded-lg border border-white/10 bg-[#07122f] p-1 shadow-2xl">
           {opciones.length === 0 ? (
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => setAbierto(false)}
-              className="block w-full rounded-md px-2 py-1.5 text-left text-[11px] font-semibold text-white/70 hover:bg-white/10"
-            >
-              Sin coincidencias. Puedes dejarlo escrito.
-            </button>
+            <div className="rounded-md px-2 py-1.5 text-[11px] font-semibold text-red-100">
+              Sin coincidencias. Debes seleccionar un asesor del catálogo.
+            </div>
           ) : null}
 
           {opciones.map((asesor) => (
@@ -353,6 +360,12 @@ function AsesorAutocomplete({ value, onChange, error }) {
             </button>
           ))}
         </div>
+      ) : null}
+
+      {tieneTextoInvalido ? (
+        <p className="mt-1 text-[10px] font-bold leading-tight text-red-200">
+          Selecciona una opción de la lista.
+        </p>
       ) : null}
     </div>
   );
