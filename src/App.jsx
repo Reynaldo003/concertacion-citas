@@ -119,6 +119,10 @@ const ASESORES = [
   "Sergio Ivan Quintana Martinez",
   "Sergio Rene Delgado Sarmiento",
   "Yoseth Ruiz Castellanos",
+  "Paul Serrano Vera",
+  "Luis Alberto Ramírez Santamaría",
+  "Luis Manuel Álvarez",
+  "ESTEFANO MARLOM DE AZCUE APARICIO",
 ];
 
 const FORM_INICIAL = {
