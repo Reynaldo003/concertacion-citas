@@ -67,6 +67,8 @@ const TIPOS_CITA = [
   "Remarketing",
 ];
 
+const TIPO_VENTA = ["Nuevos", "Usados", "Comerciales"];
+
 const ASESORES = [
   "AURA MARLIZETH FERNANDEZ LOPEZ",
   "Bianca Isabel Chavez Alarcon",
@@ -144,6 +146,7 @@ const FORM_INICIAL = {
   auto_interes: "",
   fecha_hora_cita: "",
   tipo_cita: "",
+  tipo_venta: "",
   fuente_prospeccion: "",
   asesor_piso: "",
   comentarios: "",
@@ -217,6 +220,7 @@ function normalizarPayload(form) {
     auto_interes: texto(form.auto_interes),
     fecha_hora_cita: texto(form.fecha_hora_cita),
     tipo_cita: texto(form.tipo_cita),
+    tipo_venta: texto(form.tipo_venta),
     fuente_prospeccion: texto(form.fuente_prospeccion),
     asesor_piso: esAsesorValido(form.asesor_piso) ? texto(form.asesor_piso) : "",
     comentarios: texto(form.comentarios),
@@ -232,6 +236,7 @@ function obtenerErrores(form) {
   if (!texto(form.auto_interes)) errores.auto_interes = "Selecciona el VW de interés.";
   if (!texto(form.fecha_hora_cita)) errores.fecha_hora_cita = "Selecciona fecha y hora.";
   if (!texto(form.tipo_cita)) errores.tipo_cita = "Selecciona el tipo de cita.";
+  if (!texto(form.tipo_venta)) errores.tipo_venta = "Selecciona el tipo de venta.";
   if (!texto(form.fuente_prospeccion)) errores.fuente_prospeccion = "Selecciona la fuente.";
   const asesorPiso = texto(form.asesor_piso);
 
@@ -599,7 +604,6 @@ export default function App() {
                       ))}
                     </Select>
                   </Campo>
-
                   <Campo
                     label="Fuente"
                     icono={MessageSquareText}
@@ -635,9 +639,42 @@ export default function App() {
                   </Campo>
 
                   <Campo
+                    label="Tipo de venta"
+                    icono={CarFront}
+                    requerido
+                    error={error("tipo_venta")}
+                  >
+                    <div
+                      className={cls(
+                        "grid h-8 w-full min-w-[200px] grid-cols-3 rounded-lg border bg-white/10 p-0.5 lg:w-40",
+                        error("tipo_venta")
+                          ? "border-red-200 ring-1 ring-red-300/20"
+                          : "border-white/10",
+                      )}
+                    >
+                      {TIPO_VENTA.map((tipo) => (
+                        <button
+                          key={tipo}
+                          type="button"
+                          onClick={() => updateField("tipo_venta", tipo)}
+                          className={cls(
+                            "min-w-0 truncate whitespace-nowrap rounded-md px-2 text-[10px] font-black transition",
+                            form.tipo_venta === tipo
+                              ? "bg-white text-[#131E5C]"
+                              : "text-white/80 hover:bg-white/10",
+                          )}
+                          title={tipo}
+                        >
+                          {tipo}
+                        </button>
+                      ))}
+                    </div>
+                  </Campo>
+
+                  <Campo
                     label="Comentarios"
                     icono={CalendarDays}
-                    className="sm:col-span-2 md:col-span-2 lg:col-span-2 xl:col-span-2"
+                    className="sm:col-span-2 md:col-span-3 lg:col-span-3 xl:col-span-3"
                   >
                     <Textarea
                       value={form.comentarios}

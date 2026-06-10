@@ -1,4 +1,4 @@
-//src/lib/citasApi.js
+// src/lib/citasApi.js
 const API_URL =
   import.meta.env.VITE_API_URL || "https://crm.grupoautomotrizryr.com";
 // import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
@@ -48,6 +48,7 @@ function obtenerMensajeError(data) {
 
   if (data.detail) return data.detail;
   if (data.message) return data.message;
+
   if (Array.isArray(data.non_field_errors) && data.non_field_errors[0]) {
     return data.non_field_errors[0];
   }
@@ -66,13 +67,15 @@ export async function crearCita(respuestas) {
   const payload = {
     nombre: limpiarTexto(respuestas.nombre).toUpperCase(),
     telefono: normalizarTelefonoMx(respuestas.telefono),
-    correo: "",
+    correo: limpiarTexto(respuestas.correo || ""),
 
     agencia: limpiarTexto(respuestas.agencia),
     auto_interes: limpiarTexto(respuestas.auto_interes),
     fecha_hora_cita: limpiarTexto(respuestas.fecha_hora_cita) || null,
 
-    tipo_cita: "Tradicional",
+    tipo_cita: limpiarTexto(respuestas.tipo_cita) || "Tradicional",
+    tipo_venta: limpiarTexto(respuestas.tipo_venta),
+
     fuente_prospeccion: limpiarTexto(respuestas.fuente_prospeccion),
     asesor_piso: limpiarTexto(respuestas.asesor_piso),
     comentarios: limpiarTexto(respuestas.comentarios),
