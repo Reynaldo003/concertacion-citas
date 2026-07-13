@@ -137,6 +137,8 @@ const ASESORES = [
   "Maria Vanessa Jiménez Medina",
   "Juan Jesús Márquez Aquino",
   "Estefano Marlom Aparicio",
+  "Blanca Patricia Hernández Hernández",
+  "Luis Manuel Hernández Espejo",
 ];
 
 const FORM_INICIAL = {
