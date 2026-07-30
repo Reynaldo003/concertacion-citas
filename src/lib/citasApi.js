@@ -74,8 +74,11 @@ export async function crearCita(respuestas) {
     fecha_hora_cita: limpiarTexto(respuestas.fecha_hora_cita) || null,
 
     tipo_cita: limpiarTexto(respuestas.tipo_cita) || "Tradicional",
-    tipo_venta: limpiarTexto(respuestas.tipo_venta),
 
+    // Nuevo campo
+    motivo_cita: limpiarTexto(respuestas.motivo_cita),
+
+    tipo_venta: limpiarTexto(respuestas.tipo_venta),
     fuente_prospeccion: limpiarTexto(respuestas.fuente_prospeccion),
     asesor_piso: limpiarTexto(respuestas.asesor_piso),
     comentarios: limpiarTexto(respuestas.comentarios),

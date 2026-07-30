@@ -67,6 +67,19 @@ const TIPOS_CITA = [
   "Remarketing",
 ];
 
+const MOTIVOS_CITA = [
+  "Prueba de Manejo",
+  "Avalúo de auto usado",
+  "Cotización de financiamiento",
+  "Solicitud de Crédito",
+  "Anticipo /enganche",
+  "Documentos para facturación",
+  "Firma de contrato",
+  "Lanzamiento",
+  "Open Day",
+  "Información Post-venta",
+];
+
 const TIPO_VENTA = ["Nuevos", "Usados", "Comerciales"];
 
 const ASESORES = [
@@ -139,6 +152,7 @@ const ASESORES = [
   "Estefano Marlom Aparicio",
   "Blanca Patricia Hernández Hernández",
   "Luis Manuel Hernández Espejo",
+  "JULIO RAMIREZ LOPEZ",
 ];
 
 const FORM_INICIAL = {
@@ -148,6 +162,7 @@ const FORM_INICIAL = {
   auto_interes: "",
   fecha_hora_cita: "",
   tipo_cita: "",
+  motivo_cita: "",
   tipo_venta: "",
   fuente_prospeccion: "",
   asesor_piso: "",
@@ -222,9 +237,12 @@ function normalizarPayload(form) {
     auto_interes: texto(form.auto_interes),
     fecha_hora_cita: texto(form.fecha_hora_cita),
     tipo_cita: texto(form.tipo_cita),
+    motivo_cita: texto(form.motivo_cita),
     tipo_venta: texto(form.tipo_venta),
     fuente_prospeccion: texto(form.fuente_prospeccion),
-    asesor_piso: esAsesorValido(form.asesor_piso) ? texto(form.asesor_piso) : "",
+    asesor_piso: esAsesorValido(form.asesor_piso)
+      ? texto(form.asesor_piso)
+      : "",
     comentarios: texto(form.comentarios),
   };
 }
@@ -238,6 +256,7 @@ function obtenerErrores(form) {
   if (!texto(form.auto_interes)) errores.auto_interes = "Selecciona el VW de interés.";
   if (!texto(form.fecha_hora_cita)) errores.fecha_hora_cita = "Selecciona fecha y hora.";
   if (!texto(form.tipo_cita)) errores.tipo_cita = "Selecciona el tipo de cita.";
+  if (!texto(form.motivo_cita)) { errores.motivo_cita = "Selecciona el motivo de la cita."; }
   if (!texto(form.tipo_venta)) errores.tipo_venta = "Selecciona el tipo de venta.";
   if (!texto(form.fuente_prospeccion)) errores.fuente_prospeccion = "Selecciona la fuente.";
   const asesorPiso = texto(form.asesor_piso);
@@ -648,7 +667,7 @@ export default function App() {
                   >
                     <div
                       className={cls(
-                        "grid h-8 w-full min-w-[200px] grid-cols-3 rounded-lg border bg-white/10 p-0.5 lg:w-40",
+                        "grid h-8 w-full min-w-[165px] grid-cols-3 rounded-lg border bg-white/10 p-0.5 lg:w-40",
                         error("tipo_venta")
                           ? "border-red-200 ring-1 ring-red-300/20"
                           : "border-white/10",
@@ -673,6 +692,26 @@ export default function App() {
                     </div>
                   </Campo>
 
+                  <Campo
+                    label="Motivo de cita"
+                    icono={CalendarDays}
+                    requerido
+                    error={error("motivo_cita")}
+                  >
+                    <Select
+                      value={form.motivo_cita}
+                      error={error("motivo_cita")}
+                      onChange={(e) => updateField("motivo_cita", e.target.value)}
+                    >
+                      <option value="">Seleccionar...</option>
+
+                      {MOTIVOS_CITA.map((motivo) => (
+                        <option key={motivo} value={motivo}>
+                          {motivo}
+                        </option>
+                      ))}
+                    </Select>
+                  </Campo>
                   <Campo
                     label="Comentarios"
                     icono={CalendarDays}
