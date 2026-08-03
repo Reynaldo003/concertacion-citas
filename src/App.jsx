@@ -153,6 +153,9 @@ const ASESORES = [
   "Blanca Patricia Hernández Hernández",
   "Luis Manuel Hernández Espejo",
   "JULIO RAMIREZ LOPEZ",
+  "David Uriel García Navarro",
+  "Gustavo Chontal Romero",
+  "Maria Monserrath Zarate Gamboa"
 ];
 
 const FORM_INICIAL = {
