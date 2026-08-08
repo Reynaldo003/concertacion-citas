@@ -146,7 +146,7 @@ const ASESORES = [
   "Luis Alberto Ramírez Santamaría",
   "Luis Manuel Álvarez",
   "ESTEFANO MARLOM DE AZCUE APARICIO",
-  "José Alberto Sedas Flores",
+  "JOSE ALBERTO SEDAS FLORES",
   "Maria Vanessa Jiménez Medina",
   "Juan Jesús Márquez Aquino",
   "Estefano Marlom Aparicio",
