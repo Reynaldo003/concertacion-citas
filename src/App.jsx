@@ -64,6 +64,7 @@ const TIPOS_CITA = [
   "Digital",
   "Tradicional",
   "Evento",
+  "Evento Taigun",
   "Remarketing",
 ];
 
