@@ -157,7 +157,8 @@ const ASESORES = [
   "JULIO RAMIREZ LOPEZ",
   "David Uriel García Navarro",
   "Gustavo Chontal Romero",
-  "Maria Monserrath Zarate Gamboa"
+  "Maria Monserrath Zarate Gamboa",
+  "Luz Eugenia Hernandez Bustos",
 ];
 
 const FORM_INICIAL = {
