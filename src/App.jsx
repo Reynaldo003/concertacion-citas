@@ -80,6 +80,7 @@ const MOTIVOS_CITA = [
   "Open Day",
   "Información Post-venta",
   "Noche Mexicana",
+  "Buen Fin 2026",
 ];
 
 const TIPO_VENTA = ["Nuevos", "Usados", "Comerciales"];
