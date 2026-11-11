@@ -6,16 +6,18 @@ import {
   CalendarDays,
   CarFront,
   CheckCircle2,
-  Clock3,
   Loader2,
   MessageSquareText,
   Phone,
   Search,
   UserRound,
+  Info,
+  Layers3,
+  Tag,
+  ArrowRight,
 } from "lucide-react";
 
 import { crearCita } from "./lib/citasApi";
-import fondo3 from "./assets/fondo3.jpg";
 
 const AGENCIAS = [
   "VW Cordoba",
@@ -276,28 +278,19 @@ function obtenerErrores(form) {
   return errores;
 }
 
-function Campo({ label, icono: Icono, requerido, error, ayuda, children, className = "" }) {
+// ─── COMPONENTES DE FORMULARIO ───────────────────────────────────────────────
+function Campo({ id, label, icono: Icono, requerido, error, ayuda, children, className = "" }) {
   return (
     <div className={cls("min-w-0", className)}>
-      <label className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-white/65">
-        {Icono ? <Icono className="h-3 w-3 shrink-0 text-white/45" /> : null}
-
-        <span className="truncate">
-          {label}
-          {requerido ? <b className="ml-0.5 text-red-200">*</b> : null}
-        </span>
+      <label htmlFor={id} className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-white/90 sm:text-xs">
+        {Icono && <Icono className="h-4 w-4 shrink-0 text-white/90" />}
+        <span>{label}{requerido && <span className="ml-1 text-rose-300">*</span>}</span>
       </label>
-
       {children}
-
       {error ? (
-        <p className="mt-1 line-clamp-2 text-[10px] font-bold leading-tight text-red-200">
-          {error}
-        </p>
+        <p className="mt-1.5 text-xs font-medium text-rose-200" role="alert">{error}</p>
       ) : ayuda ? (
-        <p className="mt-1 truncate text-[10px] leading-tight text-white/45">
-          {ayuda}
-        </p>
+        <p className="mt-1.5 text-xs text-white/65">{ayuda}</p>
       ) : null}
     </div>
   );
@@ -307,14 +300,13 @@ function Input({ error, className = "", ...props }) {
   return (
     <input
       {...props}
+      aria-invalid={Boolean(error)}
       className={cls(
-        "h-8 w-full lg:w-40 rounded-lg border bg-white/10 px-2.5 text-xs font-bold text-white outline-none transition placeholder:text-white/35",
-        "scheme-dark",
-        error
-          ? "border-red-200 ring-1 ring-red-300/20"
-          : "border-white/10 focus:border-white/40 focus:ring-1 focus:ring-white/10",
-        props.disabled ? "cursor-not-allowed opacity-50" : "",
-        className,
+        "h-12 w-full min-w-0 rounded-xl border bg-white/10 px-4 text-base text-white outline-none transition placeholder:text-white/55 sm:text-sm",
+        "focus:border-[#5da8ff] focus:bg-white/15 focus:ring-2 focus:ring-[#2e8cff]/20",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        error ? "border-rose-300" : "border-white/25 hover:border-white/40",
+        className
       )}
     />
   );
@@ -324,12 +316,12 @@ function Select({ error, children, className = "", ...props }) {
   return (
     <select
       {...props}
+      aria-invalid={Boolean(error)}
       className={cls(
-        "h-8 w-full lg:w-40 rounded-lg border bg-[#0b1b54]/95 px-2.5 text-xs font-bold text-white outline-none transition",
-        error
-          ? "border-red-200 ring-1 ring-red-300/20"
-          : "border-white/10 focus:border-white/40 focus:ring-1 focus:ring-white/10",
-        className,
+        "h-12 w-full min-w-0 cursor-pointer rounded-xl border bg-[#09265e]/90 px-4 text-base font-semibold text-white outline-none transition sm:text-sm",
+        "focus:border-[#5da8ff] focus:ring-2 focus:ring-[#2e8cff]/20",
+        error ? "border-rose-300" : "border-white/25 hover:border-white/40",
+        className
       )}
     >
       {children}
@@ -341,12 +333,12 @@ function Textarea({ error, className = "", ...props }) {
   return (
     <textarea
       {...props}
+      aria-invalid={Boolean(error)}
       className={cls(
-        "min-h-[52px] w-full resize-none rounded-lg border bg-white/10 px-2.5 py-2 text-xs font-bold text-white outline-none transition placeholder:text-white/35",
-        error
-          ? "border-red-200 ring-1 ring-red-300/20"
-          : "border-white/10 focus:border-white/40 focus:ring-1 focus:ring-white/10",
-        className,
+        "min-h-24 w-full resize-y rounded-xl border bg-white/10 px-4 py-3 text-base text-white outline-none transition placeholder:text-white/55 sm:text-sm",
+        "focus:border-[#5da8ff] focus:bg-white/15 focus:ring-2 focus:ring-[#2e8cff]/20",
+        error ? "border-rose-300" : "border-white/25 hover:border-white/40",
+        className
       )}
     />
   );
@@ -356,47 +348,35 @@ function AsesorAutocomplete({ value, onChange, error }) {
   const [abierto, setAbierto] = useState(false);
 
   const opciones = useMemo(() => {
-    const q = normalizarBusqueda(value);
-
-    if (!q) return ASESORES.slice(0, 8);
-
-    return ASESORES.filter((asesor) => {
-      return normalizarBusqueda(asesor).includes(q);
-    }).slice(0, 8);
+    const busqueda = normalizarBusqueda(value);
+    if (!busqueda) return ASESORES.slice(0, 8);
+    return ASESORES.filter((asesor) => normalizarBusqueda(asesor).includes(busqueda)).slice(0, 8);
   }, [value]);
 
-  const valorEsValido = esAsesorValido(value);
-  const tieneTextoInvalido = texto(value) && !valorEsValido;
+  const esInvalido = texto(value) && !esAsesorValido(value);
 
   return (
-    <div className="relative w-full lg:w-40">
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-white/45" />
-
-        <Input
-          value={value}
-          error={error || tieneTextoInvalido}
-          onFocus={() => setAbierto(true)}
-          onBlur={() => {
-            window.setTimeout(() => setAbierto(false), 120);
-          }}
-          onChange={(e) => {
-            onChange(e.target.value);
-            setAbierto(true);
-          }}
-          placeholder="Buscar asesor..."
-          className="pl-7"
-        />
-      </div>
-
-      {abierto ? (
-        <div className="absolute left-0 right-0 z-30 mt-1 max-h-48 overflow-y-auto rounded-lg border border-white/10 bg-[#07122f] p-1 shadow-2xl">
-          {opciones.length === 0 ? (
-            <div className="rounded-md px-2 py-1.5 text-[11px] font-semibold text-red-100">
-              Sin coincidencias. Debes seleccionar un asesor del catálogo.
-            </div>
-          ) : null}
-
+    <div className="relative w-full">
+      <Search className="pointer-events-none absolute left-4 top-4 h-4 w-4 text-white/65" />
+      <Input
+        id="asesor_piso"
+        value={value}
+        error={error || esInvalido}
+        onFocus={() => setAbierto(true)}
+        onBlur={() => window.setTimeout(() => setAbierto(false), 180)}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setAbierto(true);
+        }}
+        autoComplete="off"
+        placeholder="Buscar asesor..."
+        className="pl-11"
+      />
+      {abierto && (
+        <div className="absolute inset-x-0 top-full z-50 mt-2 max-h-56 overflow-y-auto rounded-xl border border-[#539eff]/40 bg-[#071b41] p-1.5 shadow-2xl">
+          {opciones.length === 0 && (
+            <p className="px-3 py-2 text-xs text-white/75">No hay coincidencias. Selecciona un asesor del catálogo.</p>
+          )}
           {opciones.map((asesor) => (
             <button
               key={asesor}
@@ -406,23 +386,21 @@ function AsesorAutocomplete({ value, onChange, error }) {
                 onChange(asesor);
                 setAbierto(false);
               }}
-              className="block w-full rounded-md px-2 py-1.5 text-left text-[11px] font-bold text-white hover:bg-white/10"
+              className="w-full rounded-lg px-3 py-2.5 text-left text-sm text-white hover:bg-[#1a4b91] focus:bg-[#1a4b91] focus:outline-none"
             >
               {asesor}
             </button>
           ))}
         </div>
-      ) : null}
-
-      {tieneTextoInvalido ? (
-        <p className="mt-1 text-[10px] font-bold leading-tight text-red-200">
-          Selecciona una opción de la lista.
-        </p>
-      ) : null}
+      )}
+      {esInvalido && !error && (
+        <p className="mt-1.5 text-xs text-rose-200">Selecciona un asesor de la lista.</p>
+      )}
     </div>
   );
 }
 
+// ─── COMPONENTE PRINCIPAL ────────────────────────────────────────────────────
 export default function App() {
   const [form, setForm] = useState(FORM_INICIAL);
   const [enviando, setEnviando] = useState(false);
@@ -434,8 +412,9 @@ export default function App() {
   const hayErrores = Object.keys(errores).length > 0;
 
   function updateField(campo, valor) {
-    setForm((prev) => ({ ...prev, [campo]: valor }));
+    setForm((anterior) => ({ ...anterior, [campo]: valor }));
     setGuardado(false);
+    setMensaje("");
   }
 
   function error(campo) {
@@ -444,13 +423,11 @@ export default function App() {
 
   async function enviarFormulario(e) {
     e.preventDefault();
-
     setMostrarErrores(true);
     setMensaje("");
     setGuardado(false);
 
     const erroresActuales = obtenerErrores(form);
-
     if (Object.keys(erroresActuales).length > 0) {
       setMensaje(Object.values(erroresActuales)[0]);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -459,17 +436,15 @@ export default function App() {
 
     try {
       setEnviando(true);
-
       await crearCita(normalizarPayload(form));
-
       setGuardado(true);
       setMensaje("Cita guardada correctamente.");
       setForm(FORM_INICIAL);
       setMostrarErrores(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (error) {
-      console.error(error);
-      setMensaje(error.message || "No fue posible guardar la cita.");
+    } catch (err) {
+      console.error(err);
+      setMensaje(err.message || "No fue posible guardar la cita.");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setEnviando(false);
@@ -477,290 +452,151 @@ export default function App() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <div className="fixed inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(44,91,187,0.24),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.10),_transparent_28%)]" />
-        <div className="absolute left-[-12%] top-[-8%] h-72 w-72 rounded-full bg-[#2A63FF]/10 blur-3xl" />
-        <div className="absolute bottom-[-12%] right-[-10%] h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(6,16,45,0.96),rgba(11,31,94,0.92),rgba(7,16,38,0.98))]" />
-      </div>
+    <div className="relative min-h-screen overflow-x-hidden bg-[#06152f] text-white">
+      {/* Imagen colocada en public/fondo-vw.png: Vite la sirve desde la raíz. */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-[850px] bg-cover bg-[position:70%_top] bg-no-repeat sm:bg-center"
+        style={{ backgroundImage: "url('/fondo-vw.png')" }}
+      />
+      {/* Capas suaves para dar contraste sin tapar el Golf GTI. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[850px] bg-gradient-to-r from-[#06152f]/80 via-[#06152f]/40 to-[#06152f]/15" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[850px] bg-gradient-to-b from-[#06152f]/20 via-[#06152f]/10 to-[#06152f]" />
 
-      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl lg:max-w-[950px] items-center justify-center px-2 py-3 sm:px-4 sm:py-4 lg:px-5">
+      <main className="relative z-10 mx-auto w-full max-w-[1560px] px-3 pb-8 pt-5 sm:px-6 sm:pb-12 lg:px-10 lg:pt-8">
+        {/* Encabezado de marca */}
+        <header className="flex flex-wrap items-center gap-3 sm:gap-5">
+          <div className="flex items-center gap-3">
+            <img
+              src="/vw_white.png"
+              alt="Logo Volkswagen"
+              className="h-11 w-11 shrink-0 object-contain sm:h-12 sm:w-12"
+            />
+
+            <span className="text-xl font-bold tracking-tight sm:text-2xl">Volkswagen | CRM</span>
+          </div>
+        </header>
+
+        {/* Título central */}
+        <div className="mb-7 mt-8 text-center sm:mb-9 sm:mt-5">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-[#06142f]/35 px-5 py-2 text-xs font-semibold text-white backdrop-blur-md sm:text-sm">
+            <CarFront className="h-4 w-4" /> Automotriz R&amp;R
+          </span>
+          <h1 className="mt-4 text-3xl font-bold tracking-tight text-white drop-shadow-lg sm:text-4xl lg:text-5xl">Registro de citas</h1>
+          <div className="mx-auto mt-4 h-1 w-24 rounded-full bg-[#1d8bff] shadow-[0_0_22px_rgba(29,139,255,0.65)]" />
+        </div>
+
+        {mensaje && (
+          <div
+            role="alert"
+            className={cls(
+              "mb-5 flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold backdrop-blur-md",
+              guardado ? "border-emerald-300/50 bg-emerald-900/60 text-emerald-50" : "border-rose-300/50 bg-rose-950/70 text-rose-100"
+            )}
+          >
+            {guardado ? <CheckCircle2 className="h-5 w-5 shrink-0" /> : <Info className="h-5 w-5 shrink-0" />}
+            {mensaje}
+          </div>
+        )}
+
         <motion.div
-          initial={{ opacity: 0, y: 18 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-          className="relative w-full overflow-hidden rounded-2xl border border-[#131E5C]/10 p-2.5 shadow-[0_30px_80px_-25px_rgba(19,30,92,0.14)] sm:p-4"
-          style={{
-            backgroundImage: `url(${fondo3})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
+          transition={{ duration: 0.4 }}
+          className="relative rounded-[28px] border border-[#89baff]/50 bg-[#17366f]/55 p-4 shadow-[0_25px_75px_rgba(0,9,40,0.45)] sm:p-7 lg:p-9"
         >
-          <div className="absolute inset-0 bg-[#071126]/30" />
+          <form onSubmit={enviarFormulario} noValidate>
+            <div className="grid gap-x-7 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+              <Campo id="agencia" label="Dealer" icono={Building2} requerido error={error("agencia")}>
+                <Select id="agencia" value={form.agencia} error={error("agencia")} onChange={(e) => updateField("agencia", e.target.value)}>
+                  <option value="">Seleccionar...</option>
+                  {AGENCIAS.map((agencia) => <option key={agencia} value={agencia}>{agencia}</option>)}
+                </Select>
+              </Campo>
 
-          <div className="relative z-10">
-            <header className="mb-3 flex flex-col items-center justify-center gap-2 text-center">
-              <div className="flex flex-col items-center text-center">
-                <div className="mb-1 flex justify-center">
-                  <span className="inline-flex items-center rounded-full border border-white/50 bg-white/5 px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-white">
-                    Automotriz R&amp;R
-                  </span>
-                </div>
+              <Campo id="nombre" label="Nombre del cliente" icono={UserRound} requerido error={error("nombre")}>
+                <Input id="nombre" value={form.nombre} error={error("nombre")} onChange={(e) => updateField("nombre", e.target.value.toUpperCase())} placeholder="Nombre completo" />
+              </Campo>
 
-                <h1 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
-                  Registro de citas
-                </h1>
-              </div>
-            </header>
+              <Campo id="telefono" label="Teléfono" icono={Phone} requerido error={error("telefono")} ayuda="10 dígitos o 52 + 10 dígitos.">
+                <Input id="telefono" value={form.telefono} error={error("telefono")} inputMode="numeric" autoComplete="tel" onChange={(e) => updateField("telefono", soloNumeros(e.target.value).slice(0, 12))} placeholder="2711234567" />
+              </Campo>
 
-            {mensaje ? (
-              <div
-                className={cls(
-                  "mb-2.5 rounded-lg border px-3 py-2 text-xs font-bold",
-                  guardado
-                    ? "border-emerald-200/30 bg-emerald-400/15 text-emerald-100"
-                    : "border-red-200/30 bg-red-400/15 text-red-100",
-                )}
-              >
-                {mensaje}
-              </div>
-            ) : null}
+              <Campo id="auto_interes" label="VW de sus sueños" icono={CarFront} requerido error={error("auto_interes")}>
+                <Select id="auto_interes" value={form.auto_interes} error={error("auto_interes")} onChange={(e) => updateField("auto_interes", e.target.value)}>
+                  <option value="">Seleccionar...</option>
+                  {VEHICULOS.map((vehiculo) => <option key={vehiculo} value={vehiculo}>{vehiculo}</option>)}
+                </Select>
+              </Campo>
 
-            <form onSubmit={enviarFormulario}>
-              <div className="rounded-2xl border border-white/10 p-2.5 backdrop-blur-xs sm:p-3">
-                <div className="grid gap-2.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                  <Campo label="Dealer" icono={Building2} requerido error={error("agencia")}>
-                    <Select
-                      value={form.agencia}
-                      error={error("agencia")}
-                      onChange={(e) => updateField("agencia", e.target.value)}
-                    >
-                      <option value="">Seleccionar...</option>
-                      {AGENCIAS.map((agencia) => (
-                        <option key={agencia} value={agencia}>
-                          {agencia}
-                        </option>
-                      ))}
-                    </Select>
-                  </Campo>
+              <Campo id="fecha_hora_cita" label="Fecha y hora" icono={CalendarDays} requerido error={error("fecha_hora_cita")}>
+                <Input id="fecha_hora_cita" type="datetime-local" value={form.fecha_hora_cita} error={error("fecha_hora_cita")} onChange={(e) => updateField("fecha_hora_cita", e.target.value)} className="scheme-dark" />
+              </Campo>
 
-                  <Campo
-                    label="Nombre del cliente"
-                    icono={UserRound}
-                    requerido
-                    error={error("nombre")}
-                  >
-                    <Input
-                      value={form.nombre}
-                      error={error("nombre")}
-                      onChange={(e) => {
-                        updateField("nombre", e.target.value.toUpperCase());
-                      }}
-                      placeholder="NOMBRE COMPLETO"
-                    />
-                  </Campo>
+              <Campo id="tipo_cita" label="Tipo de cita" icono={CalendarDays} requerido error={error("tipo_cita")}>
+                <Select id="tipo_cita" value={form.tipo_cita} error={error("tipo_cita")} onChange={(e) => updateField("tipo_cita", e.target.value)}>
+                  <option value="">Seleccionar...</option>
+                  {TIPOS_CITA.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
+                </Select>
+              </Campo>
 
-                  <Campo
-                    label="Teléfono"
-                    icono={Phone}
-                    requerido
-                    error={error("telefono")}
-                    ayuda="10 dígitos o 52 + 10 dígitos."
-                  >
-                    <Input
-                      value={form.telefono}
-                      error={error("telefono")}
-                      onChange={(e) => {
-                        updateField("telefono", soloNumeros(e.target.value).slice(0, 12));
-                      }}
-                      inputMode="numeric"
-                      placeholder="2711234567"
-                    />
-                  </Campo>
+              <Campo id="fuente_prospeccion" label="Fuente" icono={Layers3} requerido error={error("fuente_prospeccion")}>
+                <Select id="fuente_prospeccion" value={form.fuente_prospeccion} error={error("fuente_prospeccion")} onChange={(e) => updateField("fuente_prospeccion", e.target.value)}>
+                  <option value="">Seleccionar...</option>
+                  {FUENTE.map((fuente) => <option key={fuente} value={fuente}>{fuente}</option>)}
+                </Select>
+              </Campo>
 
-                  <Campo
-                    label="VW de sus sueños"
-                    icono={CarFront}
-                    requerido
-                    error={error("auto_interes")}
-                  >
-                    <Select
-                      value={form.auto_interes}
-                      error={error("auto_interes")}
-                      onChange={(e) => updateField("auto_interes", e.target.value)}
-                    >
-                      <option value="">Seleccionar...</option>
-                      {VEHICULOS.map((vehiculo) => (
-                        <option key={vehiculo} value={vehiculo}>
-                          {vehiculo}
-                        </option>
-                      ))}
-                    </Select>
-                  </Campo>
+              <Campo id="asesor_piso" label="Asesor de piso" icono={Search} requerido error={error("asesor_piso")}>
+                <AsesorAutocomplete value={form.asesor_piso} error={error("asesor_piso")} onChange={(asesor) => updateField("asesor_piso", asesor)} />
+              </Campo>
 
-                  <Campo
-                    label="Fecha y hora"
-                    icono={Clock3}
-                    requerido
-                    error={error("fecha_hora_cita")}
-                  >
-                    <Input
-                      type="datetime-local"
-                      value={form.fecha_hora_cita}
-                      error={error("fecha_hora_cita")}
-                      onChange={(e) => updateField("fecha_hora_cita", e.target.value)}
-                    />
-                  </Campo>
-
-                  <Campo
-                    label="Tipo de cita"
-                    icono={CalendarDays}
-                    requerido
-                    error={error("tipo_cita")}
-                  >
-                    <Select
-                      value={form.tipo_cita}
-                      error={error("tipo_cita")}
-                      onChange={(e) => updateField("tipo_cita", e.target.value)}
-                    >
-                      {TIPOS_CITA.map((tipo) => (
-                        <option key={tipo} value={tipo}>
-                          {tipo}
-                        </option>
-                      ))}
-                    </Select>
-                  </Campo>
-                  <Campo
-                    label="Fuente"
-                    icono={MessageSquareText}
-                    requerido
-                    error={error("fuente_prospeccion")}
-                  >
-                    <Select
-                      value={form.fuente_prospeccion}
-                      error={error("fuente_prospeccion")}
-                      onChange={(e) => updateField("fuente_prospeccion", e.target.value)}
-                    >
-                      <option value="">Seleccionar...</option>
-                      {FUENTE.map((opcion) => (
-                        <option key={opcion} value={opcion}>
-                          {opcion}
-                        </option>
-                      ))}
-                    </Select>
-                  </Campo>
-
-                  <Campo
-                    label="Asesor de piso"
-                    icono={Search}
-                    requerido
-                    error={error("asesor_piso")}
-                    className="sm:col-span-1"
-                  >
-                    <AsesorAutocomplete
-                      value={form.asesor_piso}
-                      error={error("asesor_piso")}
-                      onChange={(valor) => updateField("asesor_piso", valor)}
-                    />
-                  </Campo>
-
-                  <Campo
-                    label="Tipo de venta"
-                    icono={CarFront}
-                    requerido
-                    error={error("tipo_venta")}
-                  >
-                    <div
+              <Campo label="Tipo de venta" icono={CarFront} requerido error={error("tipo_venta")}>
+                <div role="group" aria-label="Tipo de venta" className={cls("flex h-12 w-full items-center gap-1 rounded-xl border bg-white/10 p-1", error("tipo_venta") ? "border-rose-300" : "border-white/25")}>
+                  {TIPO_VENTA.map((tipo) => (
+                    <button
+                      key={tipo}
+                      type="button"
+                      aria-pressed={form.tipo_venta === tipo}
+                      onClick={() => updateField("tipo_venta", tipo)}
                       className={cls(
-                        "grid h-8 w-full min-w-[165px] grid-cols-3 rounded-lg border bg-white/10 p-0.5 lg:w-40",
-                        error("tipo_venta")
-                          ? "border-red-200 ring-1 ring-red-300/20"
-                          : "border-white/10",
+                        "min-w-0 flex-1 rounded-lg px-1 py-2.5 text-[11px] font-bold transition sm:text-xs",
+                        form.tipo_venta === tipo ? "bg-gradient-to-r from-[#248dff] to-[#0659e0] text-white shadow-[0_0_12px_rgba(36,141,255,0.5)]" : "text-white/80 hover:bg-white/10"
                       )}
                     >
-                      {TIPO_VENTA.map((tipo) => (
-                        <button
-                          key={tipo}
-                          type="button"
-                          onClick={() => updateField("tipo_venta", tipo)}
-                          className={cls(
-                            "min-w-0 truncate whitespace-nowrap rounded-md px-2 text-[10px] font-black transition",
-                            form.tipo_venta === tipo
-                              ? "bg-white text-[#131E5C]"
-                              : "text-white/80 hover:bg-white/10",
-                          )}
-                          title={tipo}
-                        >
-                          {tipo}
-                        </button>
-                      ))}
-                    </div>
-                  </Campo>
-
-                  <Campo
-                    label="Motivo de cita"
-                    icono={CalendarDays}
-                    requerido
-                    error={error("motivo_cita")}
-                  >
-                    <Select
-                      value={form.motivo_cita}
-                      error={error("motivo_cita")}
-                      onChange={(e) => updateField("motivo_cita", e.target.value)}
-                    >
-                      <option value="">Seleccionar...</option>
-
-                      {MOTIVOS_CITA.map((motivo) => (
-                        <option key={motivo} value={motivo}>
-                          {motivo}
-                        </option>
-                      ))}
-                    </Select>
-                  </Campo>
-                  <Campo
-                    label="Comentarios"
-                    icono={CalendarDays}
-                    className="sm:col-span-2 md:col-span-3 lg:col-span-3 xl:col-span-3"
-                  >
-                    <Textarea
-                      value={form.comentarios}
-                      onChange={(e) => updateField("comentarios", e.target.value)}
-                      placeholder="Notas adicionales de la cita..."
-                      className="lg:w-full"
-                    />
-                  </Campo>
+                      {tipo}
+                    </button>
+                  ))}
                 </div>
+              </Campo>
 
-                <div className="mt-3 flex flex-col gap-2 rounded-xl border border-white/10 bg-[#06122f]/80 p-2.5 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-xs font-semibold text-white/70">
-                    {mostrarErrores && hayErrores
-                      ? Object.values(errores)[0]
-                      : "Revisa los datos y guarda la cita."}
-                  </p>
+              <Campo id="motivo_cita" label="Motivo de cita" icono={Tag} requerido error={error("motivo_cita")}>
+                <Select id="motivo_cita" value={form.motivo_cita} error={error("motivo_cita")} onChange={(e) => updateField("motivo_cita", e.target.value)}>
+                  <option value="">Seleccionar...</option>
+                  {MOTIVOS_CITA.map((motivo) => <option key={motivo} value={motivo}>{motivo}</option>)}
+                </Select>
+              </Campo>
 
-                  <button
-                    type="submit"
-                    disabled={enviando}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-2 text-xs font-black text-[#131E5C] transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-                  >
-                    {enviando ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Guardando...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="h-4 w-4" />
-                        Guardar cita
-                      </>
-                    )}
-                  </button>
-                </div>
+              <Campo id="comentarios" label="Comentarios" icono={MessageSquareText} className="sm:col-span-2 lg:col-span-2">
+                <Textarea id="comentarios" value={form.comentarios} onChange={(e) => updateField("comentarios", e.target.value)} placeholder="Notas adicionales de la cita..." rows={3} />
+              </Campo>
+            </div>
+
+            <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-[#80b8ff]/30 bg-[#061943]/85 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+              <div className="flex items-center gap-3 text-sm text-white/85">
+                <Info className="h-5 w-5 shrink-0" />
+                <span>{mostrarErrores && hayErrores ? Object.values(errores)[0] : "Revisa los datos y guarda la cita."}</span>
               </div>
-            </form>
-          </div>
+              <button
+                type="submit"
+                disabled={enviando}
+                className="inline-flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-white px-7 text-sm font-bold text-[#0a2b75] shadow-lg transition hover:bg-[#e9f3ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              >
+                {enviando ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />}
+                {enviando ? "Guardando..." : "Guardar cita"}
+                {!enviando && <ArrowRight className="h-4 w-4" />}
+              </button>
+            </div>
+          </form>
         </motion.div>
       </main>
     </div>
